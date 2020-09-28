@@ -28,6 +28,7 @@
 #include "hw/timer/esp32_frc_timer.h"
 #include "hw/timer/esp32_timg.h"
 #include "hw/ssi/esp32_spi.h"
+#include "hw/i2c/esp32_i2c.h"
 #include "hw/nvram/esp32_efuse.h"
 #include "hw/xtensa/xtensa_memory.h"
 #include "hw/misc/unimp.h"
@@ -100,6 +101,7 @@ typedef struct Esp32SocState {
     Esp32FrcTimerState frc_timer[ESP32_FRC_COUNT];
     Esp32TimgState timg[ESP32_TIMG_COUNT];
     Esp32SpiState spi[ESP32_SPI_COUNT];
+    Esp32I2CState i2c[ESP32_I2C_COUNT];
     Esp32ShaState sha;
     Esp32EfuseState efuse;
     DeviceState *eth;
@@ -200,6 +202,9 @@ static void esp32_soc_reset(DeviceState *dev)
         s->timg[0].flash_boot_mode = flash_boot_mode;
         for (int i = 0; i < ESP32_SPI_COUNT; ++i) {
             device_cold_reset(DEVICE(&s->spi[i]));
+        }
+        for (int i = 0; i < ESP32_I2C_COUNT; i++) {
+            device_cold_reset(DEVICE(&s->i2c[i]));
         }
         device_cold_reset(DEVICE(&s->efuse));
         if (s->eth) {
@@ -429,6 +434,18 @@ static void esp32_soc_realize(DeviceState *dev, Error **errp)
                            qdev_get_gpio_in(intmatrix_dev, ETS_SPI0_INTR_SOURCE + i));
     }
 
+    for (int i = 0; i < ESP32_I2C_COUNT; i++) {
+        const hwaddr i2c_base[] = {
+            DR_REG_I2C_EXT_BASE, DR_REG_I2C1_EXT_BASE
+        };
+        object_property_set_bool(OBJECT(&s->i2c[i]), true, "realized", &error_abort);
+
+        esp32_soc_add_periph_device(sys_mem, &s->i2c[i], i2c_base[i]);
+
+        sysbus_connect_irq(SYS_BUS_DEVICE(&s->i2c[i]), 0,
+                           qdev_get_gpio_in(intmatrix_dev, ETS_I2C_EXT0_INTR_SOURCE + i));
+    }
+
     object_property_set_bool(OBJECT(&s->rng), true, "realized", &error_abort);
     esp32_soc_add_periph_device(sys_mem, &s->rng, ESP32_RNG_BASE);
 
@@ -448,8 +465,6 @@ static void esp32_soc_realize(DeviceState *dev, Error **errp)
     esp32_soc_add_unimp_device(sys_mem, "esp32.apbctrl", DR_REG_APB_CTRL_BASE, 0x1000);
     esp32_soc_add_unimp_device(sys_mem, "esp32.i2s0", DR_REG_I2S_BASE, 0x1000);
     esp32_soc_add_unimp_device(sys_mem, "esp32.i2s1", DR_REG_I2S1_BASE, 0x1000);
-    esp32_soc_add_unimp_device(sys_mem, "esp32.i2c0", DR_REG_I2C_EXT_BASE, 0x1000);
-    esp32_soc_add_unimp_device(sys_mem, "esp32.i2c1", DR_REG_I2C1_EXT_BASE, 0x1000);
 
     qemu_register_reset((QEMUResetHandler*) esp32_soc_reset, dev);
 }
@@ -519,6 +534,12 @@ static void esp32_soc_init(Object *obj)
                                 TYPE_ESP32_SPI, &error_abort, NULL);
     }
 
+    for (int i = 0; i < ESP32_I2C_COUNT; ++i) {
+        snprintf(name, sizeof(name), "i2c%d", i);
+        object_initialize_child(obj, name, &s->i2c[i], sizeof(s->i2c[i]),
+                                TYPE_ESP32_I2C, &error_abort, NULL);
+    }
+
     object_initialize_child(obj, "rng", &s->rng, sizeof(s->rng),
                             TYPE_ESP32_RNG, &error_abort, NULL);
 
@@ -585,6 +606,13 @@ static void esp32_machine_init_spi_flash(MachineState *machine, Esp32SocState *s
                                 qdev_get_gpio_in_named(flash_dev, SSI_GPIO_CS, 0));
 }
 
+static void esp32_machine_init_i2c(Esp32SocState *s)
+{
+    //DeviceState *i2c_master = DEVICE(&s->i2c[0]);
+    //I2CBus* i2c_bus = (I2CBus *)qdev_get_child_bus(i2c_master, "i2c");
+    //i2c_create_slave(i2c_bus, "ssd1306", 0x3C);
+}
+
 static void esp32_machine_init_openeth(Esp32SocState *ss)
 {
     SysBusDevice *sbd;
@@ -635,6 +663,8 @@ static void esp32_machine_inst_init(MachineState *machine)
     if (blk) {
         esp32_machine_init_spi_flash(machine, s, blk);
     }
+
+    esp32_machine_init_i2c(s);
 
     esp32_machine_init_openeth(s);
 
