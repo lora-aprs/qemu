@@ -50,8 +50,50 @@ static void esp32_i2c_reset(DeviceState *s)
 {
 }
 
-static uint64_t esp32_i2c_readb(void *opaque, hwaddr addr, unsigned int size)
+static uint64_t esp32_i2c_readb(void * opaque, hwaddr addr, unsigned int size)
 {
+    Esp32I2CState * s = (Esp32I2CState *)opaque;
+
+    switch(addr)
+    {
+    case I2C_CTR_REG:
+        return s->i2c_ctr_reg.val;
+    case I2C_SR_REG:
+        return s->i2c_sr_reg.val;
+    case I2C_FIFO_CONF_REG:
+        return s->i2c_fifo_conf_reg.val;
+    case I2C_INT_RAW_REG:
+        {
+            int temp = s->i2c_int_raw_reg.val;
+            s->i2c_int_raw_reg.val = 0;
+            return temp;
+        }
+    case I2C_INT_CLR_REG:
+        return 0;
+    case I2C_INT_ENA_REG:
+        return s->i2c_int_ena_reg.val;
+    case I2C_INT_STATUS_REG:
+        return s->i2c_int_status_reg.val;
+    case I2C_COMD0_REG:
+    case I2C_COMD1_REG:
+    case I2C_COMD2_REG:
+    case I2C_COMD3_REG:
+    case I2C_COMD4_REG:
+    case I2C_COMD5_REG:
+    case I2C_COMD6_REG:
+    case I2C_COMD7_REG:
+    case I2C_COMD8_REG:
+    case I2C_COMD9_REG:
+    case I2C_COMD10_REG:
+    case I2C_COMD11_REG:
+    case I2C_COMD12_REG:
+    case I2C_COMD13_REG:
+    case I2C_COMD14_REG:
+    case I2C_COMD15_REG:
+        return s->i2c_comd_reg[(addr - I2C_COMD0_REG * 4) / 4].val;
+    default:
+        break;
+    }
     return 0;
 }
 
