@@ -4,6 +4,46 @@
 #include "hw/i2c/esp32_i2c.h"
 #include "hw/irq.h"
 
+enum {
+    I2C_SCL_LOW_PERIOD_REG   = 0x0000,
+    I2C_CTR_REG              = 0x0004, // r, ww, struct
+    I2C_SR_REG               = 0x0008, // r, wr, struct
+    I2C_TO_REG               = 0x000c,
+    I2C_SLAVE_ADDR_REG       = 0x0010,
+    I2C_RXFIFO_ST_REG        = 0x0014,
+    I2C_FIFO_CONF_REG        = 0x0018, // r, ww, struct
+    I2C_INT_RAW_REG          = 0x0020, // r,   , struct
+    I2C_INT_CLR_REG          = 0x0024, // r, ww
+    I2C_INT_ENA_REG          = 0x0028, // r, wr, struct
+    I2C_INT_STATUS_REG       = 0x002c, // r,   , struct
+    I2C_SDA_HOLD_REG         = 0x0030,
+    I2C_SDA_SAMPLE_REG       = 0x0034,
+    I2C_SCL_HIGH_PERIOD_REG  = 0x0038,
+    I2C_SCL_START_HOLD_REG   = 0x0040,
+    I2C_SCL_RSTART_SETUP_REG = 0x0044,
+    I2C_SCL_STOP_HOLD_REG    = 0x0048,
+    I2C_SCL_STOP_SETUP_REG   = 0x004c,
+    I2C_SCL_FILTER_CFG_REG   = 0x0050,
+    I2C_SDA_FILTER_CFG_REG   = 0x0054,
+    I2C_COMD0_REG            = 0x0058, // r, ww, struct
+    I2C_COMD1_REG            = 0x005c,
+    I2C_COMD2_REG            = 0x0060,
+    I2C_COMD3_REG            = 0x0064,
+    I2C_COMD4_REG            = 0x0068,
+    I2C_COMD5_REG            = 0x006c,
+    I2C_COMD6_REG            = 0x0070,
+    I2C_COMD7_REG            = 0x0074,
+    I2C_COMD8_REG            = 0x0078,
+    I2C_COMD9_REG            = 0x007c,
+    I2C_COMD10_REG           = 0x0080,
+    I2C_COMD11_REG           = 0x0084,
+    I2C_COMD12_REG           = 0x0088,
+    I2C_COMD13_REG           = 0x008c,
+    I2C_COMD14_REG           = 0x0090,
+    I2C_COMD15_REG           = 0x0094,
+    I2C_FIFO_START           = 0x0100
+};
+
 #define ESP32_I2C_MEM_SIZE 0x1000
 
 static void esp32_i2c_reset(DeviceState *s)
@@ -33,8 +73,7 @@ static void esp32_i2c_init(Object *o)
 {
     Esp32I2CState *s = Esp32_I2C(o);
 
-    memory_region_init_io(&s->iomem, OBJECT(s), &esp32_i2c_ops, s,
-                          TYPE_ESP32_I2C, ESP32_I2C_MEM_SIZE);
+    memory_region_init_io(&s->iomem, OBJECT(s), &esp32_i2c_ops, s, TYPE_ESP32_I2C, ESP32_I2C_MEM_SIZE);
     sysbus_init_mmio(SYS_BUS_DEVICE(s), &s->iomem);
     sysbus_init_irq(SYS_BUS_DEVICE(s), &s->irq);
     s->bus = i2c_init_bus(DEVICE(s), "i2c");

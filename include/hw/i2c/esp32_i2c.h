@@ -7,6 +7,164 @@
 #define TYPE_ESP32_I2C "esp32.i2c"
 #define Esp32_I2C(obj) OBJECT_CHECK(Esp32I2CState, (obj), TYPE_ESP32_I2C)
 
+// I2C_CTR_REG
+typedef union {
+   struct {
+      uint32_t I2C_SDA_FORCE_OUT    : 1;
+      uint32_t I2C_SCL_FORCE_OUT    : 1;
+      uint32_t I2C_SAMPLE_SCL_LEVEL : 1;
+      uint32_t I2C_MS_MODE          : 1;
+      uint32_t I2C_TRANS_START      : 1;
+      uint32_t I2C_TX_LSB_FIRST     : 1;
+      uint32_t I2C_RX_LSB_FIRST     : 1;
+      uint32_t                      : 24;
+   };
+   uint32_t val;
+} i2c_ctr_reg_t;
+
+// I2C_SR_REG
+enum i2c_scl_state_last_t : uint32_t
+{
+   I2C_SCL_STATE_LAST_IDLE          = 0,
+   I2C_SCL_STATE_LAST_START         = 1,
+   I2C_SCL_STATE_LAST_NEGATIVE_EDGE = 3,
+   I2C_SCL_STATE_LAST_LOW           = 4,
+   I2C_SCL_STATE_LAST_POSITIVE_EDGE = 4,
+   I2C_SCL_STATE_LAST_HIGH          = 5,
+   I2C_SCL_STATE_LAST_STOP          = 6,
+};
+
+enum i2c_scl_main_state_last_t : uint32_t
+{
+   I2C_SCL_MAIN_STATE_LAST_IDLE          = 0,
+   I2C_SCL_MAIN_STATE_LAST_ADDRESS_SHIFT = 1,
+   I2C_SCL_MAIN_STATE_LAST_ACK_ADRESS    = 2,
+   I2C_SCL_MAIN_STATE_LAST_RS_DATA       = 3,
+   I2C_SCL_MAIN_STATE_LAST_TX_DATA       = 4,
+   I2C_SCL_MAIN_STATE_LAST_SEND_ACK      = 5,
+   I2C_SCL_MAIN_STATE_LAST_WAIT_ACK      = 6,
+};
+
+enum i2c_bus_busy_t : uint32_t
+{
+   I2C_BUS_IDLE = 0,
+   I2C_BUS_BUSY = 1,
+};
+
+enum i2c_slave_rw_t : uint32_t
+{
+   I2C_SLAVE_RW_MASTER_WRITE = 0,
+   I2C_SLAVE_RW_MASTER_READ  = 1,
+};
+
+typedef union {
+   struct {
+      uint32_t                       I2C_ACK_REC             : 1;
+      enum i2c_slave_rw_t            I2C_SLAVE_RW            : 1;
+      uint32_t                       I2C_TIME_OUT            : 1;
+      uint32_t                       I2C_ARB_LOST            : 1;
+      enum i2c_bus_busy_t            I2C_BUS_BUSY            : 1;
+      uint32_t                       I2C_SLAVE_ADDRESSED     : 1;
+      uint32_t                       I2C_BYTE_TRANS          : 1;
+      uint32_t                                               : 1;
+      uint32_t                       I2C_RXFIFO_CNT          : 6;
+      uint32_t                                               : 4;
+      uint32_t                       I2C_TXFIFO_CNT          : 6;
+      enum i2c_scl_main_state_last_t I2C_SCL_MAIN_STATE_LAST : 3;
+      uint32_t                                               : 1;
+      enum i2c_scl_state_last_t      I2C_SCL_STATE_LAST      : 3;
+      uint32_t                                               : 1;
+   };
+   uint32_t val;
+} i2c_sr_reg_t;
+
+// I2C_FIFO_CONF_REG
+typedef union {
+   struct {
+      uint32_t I2C_NONFIFO_EN       : 1;
+      uint32_t I2C_FIFO_ADDR_CFG_EN : 1;
+      uint32_t                      : 2;
+      uint32_t I2C_NONFIFO_RX_THRES : 6;
+      uint32_t I2C_NONFIFO_TX_THRES : 6;
+      uint32_t                      : 6;
+   };
+   uint32_t val;
+} i2c_fifo_conf_reg_t;
+
+// I2C_INT_RAW_REG
+typedef union {
+   struct {
+      uint32_t I2C_END_DETECT_INT_RAW       : 1;
+      uint32_t I2C_ARBITRATION_LOST_INT_RAW : 1;
+      uint32_t I2C_MASTER_TRAN_COMP_INT_RAW : 1;
+      uint32_t I2C_TRANS_COMPLETE_INT_RAW   : 1;
+      uint32_t I2C_TIME_OUT_INT_RAW         : 1;
+      uint32_t I2C_TRANS_START_INT_RAW      : 1;
+      uint32_t I2C_ACK_ERR_INT_RAW          : 1;
+      uint32_t I2C_RX_REC_FULL_INT_RAW      : 1;
+      uint32_t I2C_TX_SEND_EMPTY_INT_RAW    : 1;
+      uint32_t                              : 19;
+   };
+   uint32_t val;
+} i2c_int_raw_reg_t;
+
+// I2C_INT_ENA_REG
+typedef union {
+   struct {
+      uint32_t I2C_END_DETECT_INT_ENA       : 1;
+      uint32_t I2C_ARBITRATION_LOST_INT_ENA : 1;
+      uint32_t I2C_MASTER_TRAN_COMP_INT_ENA : 1;
+      uint32_t I2C_TRANS_COMPLETE_INT_ENA   : 1;
+      uint32_t I2C_TIME_OUT_INT_ENA         : 1;
+      uint32_t I2C_TRANS_START_INT_ENA      : 1;
+      uint32_t I2C_ACK_ERR_INT_ENA          : 1;
+      uint32_t I2C_RX_REC_FULL_INT_ENA      : 1;
+      uint32_t I2C_TX_SEND_EMPTY_INT_ENA    : 1;
+      uint32_t                              : 19;
+   };
+   uint32_t val;
+} i2c_int_ena_reg_t;
+
+// I2C_INT_STATUS_REG
+typedef union {
+   struct {
+      uint32_t I2C_END_DETECT_INT_ST       : 1;
+      uint32_t I2C_ARBITRATION_LOST_INT_ST : 1;
+      uint32_t I2C_MASTER_TRAN_COMP_INT_ST : 1;
+      uint32_t I2C_TRANS_COMPLETE_INT_ST   : 1;
+      uint32_t I2C_TIME_OUT_INT_ST         : 1;
+      uint32_t I2C_TRANS_START_INT_ST      : 1;
+      uint32_t I2C_ACK_ERR_INT_ST          : 1;
+      uint32_t I2C_RX_REC_FULL_INT_ST      : 1;
+      uint32_t I2C_TX_SEND_EMPTY_INT_ST    : 1;
+      uint32_t                             : 19;
+   };
+   uint32_t val;
+} i2c_int_status_reg_t;
+
+// I2C_COMDx_REG
+enum i2c_command_op_code_t : uint32_t
+{
+   I2C_COMMAND_OP_CODE_RSTART = 0,
+   I2C_COMMAND_OP_CODE_WRITE  = 1,
+   I2C_COMMAND_OP_CODE_READ   = 2,
+   I2C_COMMAND_OP_CODE_STOP   = 3,
+   I2C_COMMAND_OP_CODE_END    = 4,
+};
+
+typedef union {
+   struct {
+      uint32_t                   I2C_COMMAND_BYTE_NUM     : 8;
+      uint32_t                   I2C_COMMAND_ACK_CHECK_EN : 1;
+      uint32_t                   I2C_COMMAND_ACK_EXP      : 1;
+      uint32_t                   I2C_COMMAND_ACK_VALUE    : 1;
+      enum i2c_command_op_code_t I2C_COMMAND_OP_CODE      : 3;
+      uint32_t                                            : 17;
+      uint32_t                   I2C_COMMAND_DONE         : 1;
+   };
+   uint32_t val;
+} i2c_comd_reg_t;
+
 typedef struct Esp32I2CState {
    SysBusDevice parent_obj;
 
@@ -15,6 +173,14 @@ typedef struct Esp32I2CState {
    I2CBus *bus;
    
    bitbang_i2c_interface bitbang;
+
+   i2c_ctr_reg_t i2c_ctr_reg;
+   i2c_sr_reg_t i2c_sr_reg;
+   i2c_fifo_conf_reg_t i2c_fifo_conf_reg;
+   i2c_int_raw_reg_t i2c_int_raw_reg;
+   i2c_int_ena_reg_t i2c_int_ena_reg;
+   i2c_int_status_reg_t i2c_int_status_reg;
+   i2c_comd_reg_t i2c_comd_reg[16];
 } Esp32I2CState;
 
 #endif /* ESP32_I2C_H */
