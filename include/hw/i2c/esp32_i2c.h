@@ -27,7 +27,7 @@ typedef union {
 } i2c_ctr_reg_t;
 
 // I2C_SR_REG
-enum i2c_scl_state_last_t : uint32_t
+enum i2c_scl_state_last_t
 {
     I2C_SCL_STATE_LAST_IDLE          = 0,
     I2C_SCL_STATE_LAST_START         = 1,
@@ -38,7 +38,7 @@ enum i2c_scl_state_last_t : uint32_t
     I2C_SCL_STATE_LAST_STOP          = 6,
 };
 
-enum i2c_scl_main_state_last_t : uint32_t
+enum i2c_scl_main_state_last_t
 {
     I2C_SCL_MAIN_STATE_LAST_IDLE          = 0,
     I2C_SCL_MAIN_STATE_LAST_ADDRESS_SHIFT = 1,
@@ -49,13 +49,13 @@ enum i2c_scl_main_state_last_t : uint32_t
     I2C_SCL_MAIN_STATE_LAST_WAIT_ACK      = 6,
 };
 
-enum i2c_bus_busy_t : uint32_t
+enum i2c_bus_busy_t
 {
     I2C_BUS_IDLE = 0,
     I2C_BUS_BUSY = 1,
 };
 
-enum i2c_slave_rw_t : uint32_t
+enum i2c_slave_rw_t
 {
     I2C_SLAVE_RW_MASTER_WRITE = 0,
     I2C_SLAVE_RW_MASTER_READ  = 1,
@@ -132,7 +132,7 @@ typedef union {
 } i2c_int_reg_t;
 
 // I2C_COMDx_REG
-enum i2c_command_op_code_t : uint32_t
+enum i2c_command_op_code_t
 {
     I2C_COMMAND_OP_CODE_RSTART = 0,
     I2C_COMMAND_OP_CODE_WRITE  = 1,
