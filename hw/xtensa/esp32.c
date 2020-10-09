@@ -608,9 +608,16 @@ static void esp32_machine_init_spi_flash(MachineState *machine, Esp32SocState *s
 
 static void esp32_machine_init_i2c(Esp32SocState *s)
 {
-    //DeviceState *i2c_master = DEVICE(&s->i2c[0]);
-    //I2CBus* i2c_bus = (I2CBus *)qdev_get_child_bus(i2c_master, "i2c");
-    //i2c_create_slave(i2c_bus, "ssd1306", 0x3C);
+    {
+        DeviceState *i2c_master = DEVICE(&s->i2c[0]);
+        I2CBus* i2c_bus = (I2CBus *)qdev_get_child_bus(i2c_master, "i2c");
+        i2c_create_slave(i2c_bus, "ssd1306", 0x3c);
+    }
+    {
+        DeviceState *i2c_master = DEVICE(&s->i2c[1]);
+        I2CBus* i2c_bus = (I2CBus *)qdev_get_child_bus(i2c_master, "i2c");
+        i2c_create_slave(i2c_bus, "ssd1306", 0x3c);
+    }
 }
 
 static void esp32_machine_init_openeth(Esp32SocState *ss)
